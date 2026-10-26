@@ -1,0 +1,8 @@
+*.rbxl
+*.rbxlx
+*.rbxm
+*.rbxl.lock
+*.rbxlx.lock
+sourcemap.json
+node_modules/
+tests/_parity_cases.luau

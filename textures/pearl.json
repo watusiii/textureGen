@@ -1,0 +1,28 @@
+{
+  "id": "pearl",
+  "version": 1,
+  "name": "Pearl Mica",
+  "rough": {
+    "roughness": 0.8
+  },
+  "polished": {
+    "roughness": 0.06,
+    "metalness": 0.3
+  },
+  "layers": [
+    {
+      "type": "fill",
+      "color": "#c8d4dc",
+      "accent": "#e6e0d0"
+    },
+    {
+      "type": "speckle",
+      "color": "#ffffff",
+      "amount": 0.7,
+      "scale": 90,
+      "density": 0.25,
+      "metalness": 0.9,
+      "roughness": 0.05
+    }
+  ]
+}

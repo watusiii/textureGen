@@ -1,0 +1,26 @@
+{
+  "id": "sakura",
+  "version": 1,
+  "name": "Sakura Pigment",
+  "rough": {
+    "roughness": 0.85
+  },
+  "polished": {
+    "roughness": 0.1,
+    "metalness": 0.04
+  },
+  "layers": [
+    {
+      "type": "fill",
+      "color": "#f07aa0",
+      "accent": "#f8b7c8"
+    },
+    {
+      "type": "ribbons",
+      "color": "#fde0d6",
+      "amount": 0.45,
+      "scale": 7,
+      "width": 0.5
+    }
+  ]
+}

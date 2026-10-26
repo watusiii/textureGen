@@ -1,0 +1,22 @@
+{
+  "id": "earth",
+  "version": 1,
+  "name": "Deep Earth",
+  "rough": {
+    "roughness": 0.92
+  },
+  "polished": {
+    "roughness": 0.12,
+    "metalness": 0.02
+  },
+  "layers": [
+    {
+      "type": "earth",
+      "color": "#2b1d14",
+      "color2": "#6b4a32",
+      "color3": "#a8845c",
+      "scale": 2.5,
+      "detail": 4
+    }
+  ]
+}

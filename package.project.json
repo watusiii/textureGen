@@ -1,0 +1,9 @@
+{
+  "name": "MudTexture",
+  "tree": {
+    "$path": "src",
+    "Textures": {
+      "$path": "textures"
+    }
+  }
+}

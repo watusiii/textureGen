@@ -1,0 +1,25 @@
+{
+  "id": "obsidian",
+  "version": 1,
+  "name": "Obsidian Ash",
+  "rough": {
+    "roughness": 0.85
+  },
+  "polished": {
+    "roughness": 0.04,
+    "metalness": 0.25
+  },
+  "layers": [
+    {
+      "type": "fill",
+      "color": "#120e20"
+    },
+    {
+      "type": "clouds",
+      "color": "#3b2650",
+      "amount": 0.45,
+      "scale": 2.2,
+      "softness": 0.6
+    }
+  ]
+}

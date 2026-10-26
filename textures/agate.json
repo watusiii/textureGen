@@ -1,0 +1,21 @@
+{
+  "id": "agate",
+  "version": 1,
+  "name": "Agate",
+  "rough": {
+    "roughness": 0.85
+  },
+  "polished": {
+    "roughness": 0.06,
+    "metalness": 0.02
+  },
+  "layers": [
+    {
+      "type": "agate",
+      "color": "#5a2a14",
+      "color2": "#d8c8b0",
+      "rings": 12,
+      "warp": 0.8
+    }
+  ]
+}

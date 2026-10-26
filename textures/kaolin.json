@@ -1,0 +1,32 @@
+{
+  "id": "kaolin",
+  "version": 1,
+  "name": "White Kaolin",
+  "rough": {
+    "roughness": 0.9
+  },
+  "polished": {
+    "roughness": 0.08,
+    "metalness": 0.04
+  },
+  "layers": [
+    {
+      "type": "fill",
+      "color": "#ece6d8"
+    },
+    {
+      "type": "clouds",
+      "color": "#d9d3cc",
+      "amount": 0.5,
+      "scale": 1.8,
+      "softness": 0.7
+    },
+    {
+      "type": "veins",
+      "color": "#c9c2d6",
+      "amount": 0.25,
+      "scale": 5,
+      "sharpness": 16
+    }
+  ]
+}

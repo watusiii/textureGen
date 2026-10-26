@@ -1,0 +1,21 @@
+{
+  "name": "MudTexture",
+  "tree": {
+    "$className": "DataModel",
+    "ReplicatedStorage": {
+      "MudTexture": {
+        "$path": "src",
+        "Textures": {
+          "$path": "textures"
+        }
+      }
+    },
+    "StarterPlayer": {
+      "StarterPlayerScripts": {
+        "Preview": {
+          "$path": "preview/Preview.client.luau"
+        }
+      }
+    }
+  }
+}

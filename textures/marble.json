@@ -1,0 +1,21 @@
+{
+  "id": "marble",
+  "version": 1,
+  "name": "Marble",
+  "rough": {
+    "roughness": 0.85
+  },
+  "polished": {
+    "roughness": 0.05,
+    "metalness": 0.02
+  },
+  "layers": [
+    {
+      "type": "marble",
+      "color": "#ece6dc",
+      "color2": "#4a4642",
+      "scale": 2,
+      "sharp": 3
+    }
+  ]
+}

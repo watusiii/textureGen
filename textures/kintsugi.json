@@ -1,0 +1,23 @@
+{
+  "id": "kintsugi",
+  "version": 1,
+  "name": "Gold Seam",
+  "rough": {
+    "roughness": 0.85
+  },
+  "polished": {
+    "roughness": 0.12,
+    "metalness": 0.02
+  },
+  "layers": [
+    {
+      "type": "kintsugi",
+      "color": "#1c1714",
+      "color2": "#3b2a22",
+      "color3": "#e3b44a",
+      "cells": 3,
+      "crack": 0.04,
+      "jitter": 0.4
+    }
+  ]
+}

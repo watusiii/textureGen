@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MudTexture Maker</title>
+<style>
+  :root {
+    --paper: #f4ecd6; --paper-2: #ebe2c8; --ink: #221e1a; --ink-2: #6a6158; --line: #cfc4a8; --accent: #a8462e;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--paper); color: var(--ink);
+    font: 13px/1.4 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; }
+  #app { display: grid; grid-template-columns: 1fr 380px; height: 100%; }
+  #stage { position: relative; background: #ffffff; }
+  #view { width: 100%; height: 100%; display: block; cursor: grab; }
+  #view:active { cursor: grabbing; }
+  #mapPreview { position: absolute; left: 16px; bottom: 16px; width: 256px; height: 128px; border: 1px solid var(--line); image-rendering: auto; background: #fff; }
+  #stageNote { position: absolute; left: 16px; top: 14px; color: var(--ink-2); }
+  #panel { border-left: 1px solid var(--line); overflow-y: auto; padding: 14px 16px 40px; }
+  h1 { font-size: 15px; margin: 0 0 2px; letter-spacing: .02em; }
+  h2 { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-2); margin: 18px 0 8px; font-weight: 600; }
+  .sub { color: var(--ink-2); margin-bottom: 8px; }
+  .row { display: grid; grid-template-columns: 96px 1fr 44px; align-items: center; gap: 8px; margin: 5px 0; }
+  .row label { color: var(--ink-2); }
+  .row output { text-align: right; font-variant-numeric: tabular-nums; color: var(--ink-2); }
+  select, input[type=text], input[type=number] { width: 100%; padding: 4px 6px; border: 1px solid var(--line); background: #fffaf0; color: var(--ink); border-radius: 4px; font: inherit; }
+  input[type=range] { width: 100%; accent-color: var(--ink); }
+  input[type=color] { width: 100%; height: 26px; border: 1px solid var(--line); border-radius: 4px; background: none; padding: 0; }
+  button { font: inherit; padding: 5px 10px; border: 1px solid var(--ink); background: #fffaf0; color: var(--ink); border-radius: 5px; cursor: pointer; }
+  button:hover { background: var(--paper-2); }
+  button.small { padding: 2px 7px; font-size: 12px; }
+  .buttons { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+  .layer { border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; margin: 8px 0; background: #fffaf0; }
+  .layer.selected { border-color: var(--ink); }
+  .layerHead { display: flex; align-items: center; gap: 6px; }
+  .layerHead select { flex: 1; }
+  .swatch { width: 14px; height: 14px; border-radius: 50%; border: 1px solid var(--line); flex: none; }
+  .tabs { display: flex; gap: 4px; margin: 6px 0; }
+  .tabs button.on { background: var(--ink); color: var(--paper); }
+  .help { color: var(--ink-2); font-size: 12px; margin-top: 18px; border-top: 1px solid var(--line); padding-top: 10px; }
+  code { background: var(--paper-2); padding: 0 4px; border-radius: 3px; }
+  @media (max-width: 760px) { #app { grid-template-columns: 1fr; grid-template-rows: 55vh auto; } #panel { border-left: 0; border-top: 1px solid var(--line); } }
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="stage">
+    <canvas id="view"></canvas>
+    <div id="stageNote">Drag to turn · scroll to zoom</div>
+    <canvas id="mapPreview" width="256" height="128" title="Colour map (what gets painted onto the sphere)"></canvas>
+  </div>
+  <div id="panel">
+    <h1>MudTexture Maker</h1>
+    <div class="sub">Texture definitions for any engine. One file per soil or dust. · <a href="explore.html" style="color:inherit">Explore random textures</a> · <a href="lab.html" style="color:inherit">Lab: write new generators</a></div>
+
+    <h2>Ball</h2>
+    <div class="row"><label>Body</label><select id="bodySel"></select><span></span></div>
+    <div class="row"><label>Coat</label><select id="coatSel"></select><span></span></div>
+    <div class="row"><label>Coat amount</label><input id="coatAmt" type="range" min="0" max="1" step="0.01" value="0.7"><output id="coatAmtOut"></output></div>
+    <div class="row"><label>Polish</label><input id="polish" type="range" min="0" max="1" step="0.01" value="1"><output id="polishOut"></output></div>
+    <div class="row"><label>Seed</label><input id="seed" type="number" min="1" step="1"><button id="newSeed" class="small">New</button></div>
+    <div class="row"><label>Preview size</label><select id="res"><option>128</option><option selected>256</option><option>512</option></select><span></span></div>
+
+    <h2>Edit definition</h2>
+    <div class="tabs"><button id="editBody" class="on">Body</button><button id="editCoat">Coat</button></div>
+    <div class="row"><label>Id</label><input id="defId" type="text"><span></span></div>
+    <div class="row"><label>Name</label><input id="defName" type="text"><span></span></div>
+    <div class="row"><label>Rough</label><input id="roughR" type="range" min="0" max="1" step="0.01"><output></output></div>
+    <div class="row"><label>Polished</label><input id="roughP" type="range" min="0" max="1" step="0.01"><output></output></div>
+    <div class="row"><label>Metal</label><input id="metalP" type="range" min="0" max="1" step="0.01"><output></output></div>
+    <div id="layers"></div>
+    <div class="buttons">
+      <select id="addType" style="width:auto"></select><button id="addLayer">Add layer</button>
+    </div>
+
+    <h2>Files</h2>
+    <div class="buttons">
+      <button id="saveJson">Download JSON</button>
+      <button id="loadJson">Open JSON…</button>
+      <button id="newDef">New definition</button>
+      <input id="fileIn" type="file" accept=".json" multiple hidden>
+    </div>
+    <div class="row"><label>Export maps</label><select id="exportRes"><option>256</option><option selected>512</option><option>1024</option></select><button id="exportMaps" class="small">PNG</button></div>
+
+    <div class="help">
+      Save the JSON into <code>MudTexture/textures/</code> with the same name as its id. Roblox picks it up through Rojo; every ball still gets its own seed.
+      After adding files by hand, run <code>node maker/build-library.mjs</code> so they show up here.
+      The Roblox reader is a port of <code>core/texcore.js</code>; if you change the core, change <code>src/Sampler.luau</code> too and run <code>tests/parity.sh</code>.
+    </div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/three@0.149.0/build/three.min.js"></script>
+<script src="core/texcore.js"></script>
+<script src="library.js"></script>
+<script>
+(function () {
+  "use strict";
+  const $ = (id) => document.getElementById(id);
+  const lib = JSON.parse(JSON.stringify(window.TEX_LIBRARY || {}));
+  // A ball sent over from the Explore page.
+  let opened = null;
+  try {
+    opened = JSON.parse(localStorage.getItem("mudtexture.open") || "null");
+    localStorage.removeItem("mudtexture.open");
+  } catch (e) {}
+  if (opened && opened.def && opened.def.id) lib[opened.def.id] = opened.def;
+  const PARAMS = {
+    fill: [],
+    clouds: [["scale", 0.5, 12, 0.1, 2.5], ["threshold", 0, 1, 0.01, 0.5], ["softness", 0, 1, 0.01, 0.4], ["octaves", 1, 5, 1, 3]],
+    ribbons: [["scale", 1, 20, 0.1, 7], ["warp", 0, 3, 0.05, 1.2], ["width", 0, 1, 0.01, 0.6], ["twist", 0, 8, 0.1, 3]],
+    veins: [["scale", 1, 20, 0.1, 7], ["warp", 0, 3, 0.05, 1.2], ["sharpness", 1, 40, 0.5, 12]],
+    speckle: [["scale", 10, 200, 1, 60], ["density", 0, 0.6, 0.01, 0.2]],
+    earth: [["scale", 0.5, 8, 0.1, 2.5], ["detail", 1, 6, 1, 4]],
+    kintsugi: [["cells", 1, 8, 0.1, 3], ["crack", 0.005, 0.15, 0.005, 0.04], ["jitter", 0, 1, 0.01, 0.4]],
+    agate: [["rings", 2, 40, 0.5, 12], ["warp", 0, 2.5, 0.05, 0.8]],
+    marble: [["scale", 0.5, 6, 0.1, 2], ["sharp", 1, 8, 0.1, 3]],
+    strata: [["layers", 2, 30, 1, 9], ["bend", 0, 2, 0.05, 0.5]],
+    galaxy: [["scale", 0.5, 6, 0.1, 2.2], ["stars", 0, 0.04, 0.001, 0.01]],
+  };
+  // Generator types paint their own colours: which colour slots they use and what each means.
+  const GEN_COLORS = {
+    earth: [["Dark", "color", "#2b1d14"], ["Mid", "color2", "#6b4a32"], ["Light", "color3", "#a8845c"]],
+    kintsugi: [["Shard", "color", "#1c1714"], ["Shard 2", "color2", "#3b2a22"], ["Seam", "color3", "#e3b44a"]],
+    agate: [["Colour 1", "color", "#5a2a14"], ["Colour 2", "color2", "#d8c8b0"]],
+    marble: [["Base", "color", "#ece6dc"], ["Vein", "color2", "#4a4642"]],
+    strata: [["From", "color", "#5a3a22"], ["To", "color2", "#d8b890"]],
+    galaxy: [["Dark", "color", "#0a0614"], ["Nebula", "color2", "#8a3ad0"], ["Stars", "color3", "#ffffff"]],
+  };
+  const MATERIAL = [["amount", 0, 1, 0.01, 1], ["roughness", 0, 1, 0.01, null], ["metalness", 0, 1, 0.01, null], ["glow", 0, 1, 0.01, 0], ["accentScale", 0.5, 8, 0.1, 2]];
+
+  const state = { body: lib.loam ? "loam" : Object.keys(lib)[0] || null, coat: "", editing: "body", seed: Math.floor(Math.random() * 2147483646) + 1 };
+  if (opened && opened.def) { state.body = opened.def.id; if (opened.seed) state.seed = opened.seed; }
+
+  // ---------- three.js view ----------
+  const canvas = $("view");
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0xffffff);
+  const camera = new THREE.PerspectiveCamera(35, 1, 0.1, 100);
+  let dist = 4.2;
+
+  // Soft studio environment for reflections: a white room with a few bright panels.
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  const envScene = new THREE.Scene();
+  envScene.add(new THREE.Mesh(new THREE.SphereGeometry(20, 32, 16), new THREE.MeshBasicMaterial({ color: 0xbcb6aa, side: THREE.BackSide })));
+  const panel = (x, y, z, w, h, c) => { const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color: c, side: THREE.DoubleSide })); m.position.set(x, y, z); m.lookAt(0, 0, 0); envScene.add(m); };
+  panel(0, 12, 6, 14, 8, 0xffffff); panel(-12, 4, 4, 6, 10, 0xfff4e0); panel(12, 2, -4, 6, 8, 0xdfe8ff); panel(0, -10, 0, 30, 30, 0x8a8478);
+  scene.environment = pmrem.fromScene(envScene, 0.02).texture;
+  const key = new THREE.DirectionalLight(0xffffff, 1.2); key.position.set(-3, 4, 5); scene.add(key);
+  scene.add(new THREE.HemisphereLight(0xffffff, 0xd8d0c0, 0.35));
+
+  const maps = {};
+  for (const k of ["color", "roughness", "metalness", "glow"]) {
+    const c = document.createElement("canvas"); c.width = c.height = 256;
+    const tex = new THREE.CanvasTexture(c);
+    if (k === "color") tex.encoding = THREE.sRGBEncoding;
+    maps[k] = { canvas: c, tex };
+  }
+  const material = new THREE.MeshStandardMaterial({
+    map: maps.color.tex, roughnessMap: maps.roughness.tex, metalnessMap: maps.metalness.tex,
+    emissiveMap: maps.glow.tex, emissive: new THREE.Color(0xffffff), emissiveIntensity: 1.4, roughness: 1, metalness: 1,
+  });
+  const ball = new THREE.Mesh(new THREE.SphereGeometry(1, 128, 64), material);
+  scene.add(ball);
+  const shadow = new THREE.Mesh(new THREE.CircleGeometry(1.1, 48), new THREE.MeshBasicMaterial({ color: 0x000000, transparent: true, opacity: 0.08 }));
+  shadow.rotation.x = -Math.PI / 2; shadow.position.y = -1.02; scene.add(shadow);
+
+  let yaw = 0.6, pitch = 0.25, dragging = false, lastX = 0, lastY = 0, autoSpin = true;
+  canvas.addEventListener("pointerdown", (e) => { dragging = true; autoSpin = false; lastX = e.clientX; lastY = e.clientY; canvas.setPointerCapture(e.pointerId); });
+  canvas.addEventListener("pointerup", () => { dragging = false; });
+  canvas.addEventListener("pointermove", (e) => {
+    if (!dragging) return;
+    yaw += (e.clientX - lastX) * 0.008; pitch = Math.max(-1.3, Math.min(1.3, pitch + (e.clientY - lastY) * 0.008));
+    lastX = e.clientX; lastY = e.clientY;
+  });
+  canvas.addEventListener("wheel", (e) => { e.preventDefault(); dist = Math.max(2.4, Math.min(9, dist * (1 + e.deltaY * 0.001))); }, { passive: false });
+
+  function resize() {
+    const r = canvas.parentElement.getBoundingClientRect();
+    renderer.setSize(r.width, r.height, false);
+    camera.aspect = r.width / Math.max(r.height, 1); camera.updateProjectionMatrix();
+  }
+  window.addEventListener("resize", resize);
+  function frame() {
+    if (autoSpin) yaw += 0.003;
+    ball.rotation.set(0, yaw, 0);
+    camera.position.set(0, Math.sin(pitch) * dist, Math.cos(pitch) * dist);
+    camera.lookAt(0, 0, 0);
+    renderer.render(scene, camera);
+    requestAnimationFrame(frame);
+  }
+
+  // ---------- painting ----------
+  function stack() {
+    const s = [];
+    if (state.body && lib[state.body]) s.push({ def: lib[state.body], amount: 1, polish: +$("polish").value });
+    if (state.coat && lib[state.coat]) s.push({ def: lib[state.coat], amount: +$("coatAmt").value, polish: +$("polish").value });
+    return s;
+  }
+  function paintInto(canvases, size) {
+    const m = TexCore.paintMaps(stack(), state.seed, size);
+    for (const k of Object.keys(canvases)) {
+      const c = canvases[k];
+      c.width = c.height = size;
+      c.getContext("2d").putImageData(new ImageData(m[k], size, size), 0, 0);
+    }
+  }
+  let pending = 0;
+  function repaint(fast) {
+    cancelAnimationFrame(pending);
+    pending = requestAnimationFrame(() => {
+      const size = fast ? 128 : +$("res").value;
+      const cs = {}; for (const k in maps) cs[k] = maps[k].canvas;
+      paintInto(cs, size);
+      for (const k in maps) maps[k].tex.needsUpdate = true;
+      const prev = $("mapPreview").getContext("2d");
+      prev.clearRect(0, 0, 256, 128);
+      prev.drawImage(maps.color.canvas, 0, 0, size, size, 0, 0, 256, 128);
+    });
+  }
+  let slowTimer = 0;
+  function repaintSoon() { repaint(true); clearTimeout(slowTimer); slowTimer = setTimeout(() => repaint(false), 180); }
+
+  // ---------- ball controls ----------
+  function fillSelect(sel, withNone) {
+    const keep = sel.value;
+    sel.innerHTML = "";
+    if (withNone) sel.add(new Option("none", ""));
+    for (const id of Object.keys(lib).sort()) sel.add(new Option((lib[id].name || id) + "  ·  " + id, id));
+    sel.value = keep in lib || keep === "" ? keep : sel.options[0] && sel.options[0].value;
+  }
+  function bindRange(id, outId) {
+    const el = $(id), out = $(outId);
+    const show = () => { if (out) out.textContent = (+el.value).toFixed(2); };
+    el.addEventListener("input", () => { show(); repaintSoon(); });
+    show();
+  }
+  bindRange("coatAmt", "coatAmtOut"); bindRange("polish", "polishOut");
+  $("bodySel").addEventListener("change", (e) => { state.body = e.target.value; renderEditor(); repaintSoon(); });
+  $("coatSel").addEventListener("change", (e) => { state.coat = e.target.value; renderEditor(); repaintSoon(); });
+  $("seed").value = state.seed;
+  $("seed").addEventListener("change", (e) => { state.seed = Math.max(1, Math.floor(+e.target.value || 1)); repaint(false); });
+  $("newSeed").addEventListener("click", () => { state.seed = Math.floor(Math.random() * 2147483646) + 1; $("seed").value = state.seed; repaint(false); });
+  $("res").addEventListener("change", () => repaint(false));
+
+  // ---------- definition editor ----------
+  const editingId = () => (state.editing === "coat" ? state.coat : state.body);
+  function setTab(which) {
+    state.editing = which;
+    $("editBody").classList.toggle("on", which === "body");
+    $("editCoat").classList.toggle("on", which === "coat");
+    renderEditor();
+  }
+  $("editBody").addEventListener("click", () => setTab("body"));
+  $("editCoat").addEventListener("click", () => setTab("coat"));
+
+  function defRange(id, get, set) {
+    const el = $(id), out = el.nextElementSibling;
+    el.oninput = () => { set(+el.value); out.textContent = (+el.value).toFixed(2); repaintSoon(); };
+    const v = get(); el.value = v; out.textContent = (+v).toFixed(2);
+  }
+
+  function renderEditor() {
+    const id = editingId();
+    const def = lib[id];
+    const box = $("layers");
+    box.innerHTML = "";
+    const disabled = !def;
+    for (const el of ["defId", "defName", "roughR", "roughP", "metalP", "addLayer"]) $(el).disabled = disabled;
+    if (!def) { $("defId").value = ""; $("defName").value = ""; box.innerHTML = '<div class="sub">Pick a coat above to edit it.</div>'; return; }
+    def.rough = def.rough || { roughness: 0.9 };
+    def.polished = def.polished || { roughness: 0.2, metalness: 0 };
+    def.layers = def.layers || [];
+    $("defId").value = def.id || id;
+    $("defName").value = def.name || "";
+    $("defName").oninput = (e) => { def.name = e.target.value; };
+    $("defId").onchange = (e) => {
+      const nid = e.target.value.trim().replace(/[^a-z0-9_-]/gi, "").toLowerCase();
+      if (!nid || nid === id) { e.target.value = id; return; }
+      lib[nid] = def; def.id = nid; delete lib[id];
+      if (state.body === id) state.body = nid;
+      if (state.coat === id) state.coat = nid;
+      fillSelect($("bodySel"), false); fillSelect($("coatSel"), true);
+      $("bodySel").value = state.body; $("coatSel").value = state.coat;
+      renderEditor();
+    };
+    defRange("roughR", () => def.rough.roughness, (v) => (def.rough.roughness = v));
+    defRange("roughP", () => def.polished.roughness, (v) => (def.polished.roughness = v));
+    defRange("metalP", () => def.polished.metalness || 0, (v) => (def.polished.metalness = v));
+
+    def.layers.forEach((layer, i) => {
+      const card = document.createElement("div");
+      card.className = "layer";
+      const head = document.createElement("div");
+      head.className = "layerHead";
+      const sw = document.createElement("span"); sw.className = "swatch"; sw.style.background = layer.color || "#000";
+      const type = document.createElement("select");
+      for (const t of TexCore.LAYER_TYPES) type.add(new Option(t, t));
+      type.value = layer.type;
+      type.onchange = () => { layer.type = type.value; renderEditor(); repaintSoon(); };
+      const up = Object.assign(document.createElement("button"), { className: "small", textContent: "↑", title: "Move up" });
+      const down = Object.assign(document.createElement("button"), { className: "small", textContent: "↓", title: "Move down" });
+      const del = Object.assign(document.createElement("button"), { className: "small", textContent: "✕", title: "Remove" });
+      up.onclick = () => { if (i > 0) { def.layers.splice(i - 1, 0, def.layers.splice(i, 1)[0]); renderEditor(); repaintSoon(); } };
+      down.onclick = () => { if (i < def.layers.length - 1) { def.layers.splice(i + 1, 0, def.layers.splice(i, 1)[0]); renderEditor(); repaintSoon(); } };
+      del.onclick = () => { def.layers.splice(i, 1); renderEditor(); repaintSoon(); };
+      head.append(sw, type, up, down, del);
+      card.append(head);
+
+      const colorRow = (label, keyName, optional) => {
+        const row = document.createElement("div"); row.className = "row";
+        const lab = document.createElement("label"); lab.textContent = label;
+        const inp = document.createElement("input"); inp.type = "color"; inp.value = layer[keyName] || "#888888";
+        const tog = document.createElement("span");
+        if (optional) {
+          const cb = document.createElement("input"); cb.type = "checkbox"; cb.checked = !!layer[keyName]; cb.title = "Use accent";
+          cb.onchange = () => { if (cb.checked) layer[keyName] = inp.value; else delete layer[keyName]; repaintSoon(); };
+          inp.oninput = () => { if (cb.checked) { layer[keyName] = inp.value; repaintSoon(); } };
+          tog.append(cb);
+        } else {
+          inp.oninput = () => { layer[keyName] = inp.value; sw.style.background = inp.value; repaintSoon(); };
+        }
+        row.append(lab, inp, tog); card.append(row);
+      };
+      if (GEN_COLORS[layer.type]) {
+        for (const [label, keyName, dflt] of GEN_COLORS[layer.type]) {
+          if (!layer[keyName]) layer[keyName] = dflt;
+          colorRow(label, keyName, false);
+        }
+      } else {
+        colorRow("Colour", "color", false);
+        colorRow("Accent", "accent", true);
+      }
+
+      const rangeRow = ([name, min, max, step, dflt]) => {
+        const row = document.createElement("div"); row.className = "row";
+        const lab = document.createElement("label"); lab.textContent = name;
+        const inp = document.createElement("input"); inp.type = "range"; inp.min = min; inp.max = max; inp.step = step;
+        const out = document.createElement("output");
+        const has = typeof layer[name] === "number";
+        const fallback = dflt === null ? (name === "roughness" ? def.polished.roughness : def.polished.metalness || 0) : dflt;
+        inp.value = has ? layer[name] : fallback;
+        out.textContent = has ? (+inp.value).toFixed(2) : "auto";
+        if (dflt === null && !has) out.title = "Uses the definition's polished value";
+        inp.oninput = () => { layer[name] = step >= 1 ? Math.round(+inp.value) : +inp.value; out.textContent = (+inp.value).toFixed(2); repaintSoon(); };
+        row.append(lab, inp, out); card.append(row);
+      };
+      for (const p of PARAMS[layer.type] || []) rangeRow(p);
+      for (const p of MATERIAL) { if (p[0] === "accentScale" && (!layer.accent || GEN_COLORS[layer.type])) continue; rangeRow(p); }
+      box.append(card);
+    });
+  }
+
+  for (const t of TexCore.LAYER_TYPES) $("addType").add(new Option(t, t));
+  $("addType").value = "clouds";
+  $("addLayer").addEventListener("click", () => {
+    const def = lib[editingId()]; if (!def) return;
+    const type = $("addType").value;
+    const layer = { type, color: "#8a7a66", amount: type === "fill" || GEN_COLORS[type] ? 1 : 0.5 };
+    for (const [, keyName, dflt] of GEN_COLORS[type] || []) layer[keyName] = dflt;
+    for (const [name, , , , dflt] of PARAMS[type]) if (dflt !== null) layer[name] = dflt;
+    def.layers.push(layer); renderEditor(); repaintSoon();
+  });
+
+  // ---------- files ----------
+  function download(name, blob) {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = name; a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  }
+  function clean(def) {
+    const out = { id: def.id, name: def.name, version: 1, rough: def.rough, polished: def.polished, layers: def.layers };
+    return JSON.stringify(out, null, 2) + "\n";
+  }
+  $("saveJson").addEventListener("click", () => {
+    const id = editingId(); const def = lib[id]; if (!def) return;
+    def.id = id;
+    download(id + ".json", new Blob([clean(def)], { type: "application/json" }));
+  });
+  $("loadJson").addEventListener("click", () => $("fileIn").click());
+  $("fileIn").addEventListener("change", async (e) => {
+    let last = null;
+    for (const f of e.target.files) {
+      try {
+        const def = JSON.parse(await f.text());
+        const id = (def.id || f.name.replace(/\.json$/, "")).toLowerCase();
+        def.id = id; lib[id] = def; last = id;
+      } catch (err) { alert("Could not read " + f.name + ": " + err.message); }
+    }
+    e.target.value = "";
+    if (last) {
+      fillSelect($("bodySel"), false); fillSelect($("coatSel"), true);
+      if (state.editing === "coat") state.coat = last; else state.body = last;
+      $("bodySel").value = state.body; $("coatSel").value = state.coat;
+      renderEditor(); repaint(false);
+    }
+  });
+  $("newDef").addEventListener("click", () => {
+    let n = 1; while (lib["new" + n]) n++;
+    const id = "new" + n;
+    lib[id] = { id, name: "New texture", version: 1, rough: { roughness: 0.9 }, polished: { roughness: 0.15, metalness: 0.02 },
+      layers: [{ type: "fill", color: "#7a6450" }, { type: "clouds", color: "#a08a70", amount: 0.5, scale: 2.5, threshold: 0.5, softness: 0.4, octaves: 3 }] };
+    fillSelect($("bodySel"), false); fillSelect($("coatSel"), true);
+    if (state.editing === "coat") state.coat = id; else state.body = id;
+    $("bodySel").value = state.body; $("coatSel").value = state.coat;
+    renderEditor(); repaint(false);
+  });
+  $("exportMaps").addEventListener("click", () => {
+    const size = +$("exportRes").value;
+    const cs = {}; for (const k of ["color", "roughness", "metalness", "glow"]) cs[k] = document.createElement("canvas");
+    paintInto(cs, size);
+    const base = [state.body, state.coat].filter(Boolean).join("+") + "_" + state.seed;
+    for (const k in cs) cs[k].toBlob((b) => download(base + "_" + k + ".png", b), "image/png");
+  });
+
+  // ---------- start ----------
+  fillSelect($("bodySel"), false); fillSelect($("coatSel"), true);
+  if (state.body) $("bodySel").value = state.body;
+  $("coatSel").value = "";
+  renderEditor();
+  resize();
+  repaint(false);
+  frame();
+})();
+</script>
+</body>
+</html>

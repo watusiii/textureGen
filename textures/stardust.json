@@ -1,0 +1,34 @@
+{
+  "id": "stardust",
+  "version": 1,
+  "name": "Summit Stardust",
+  "rough": {
+    "roughness": 0.85
+  },
+  "polished": {
+    "roughness": 0.08,
+    "metalness": 0.1
+  },
+  "layers": [
+    {
+      "type": "fill",
+      "color": "#2a2468"
+    },
+    {
+      "type": "veins",
+      "color": "#8af2ff",
+      "amount": 0.9,
+      "scale": 6,
+      "sharpness": 10,
+      "glow": 1
+    },
+    {
+      "type": "speckle",
+      "color": "#ffffff",
+      "amount": 0.5,
+      "scale": 100,
+      "density": 0.05,
+      "glow": 0.8
+    }
+  ]
+}

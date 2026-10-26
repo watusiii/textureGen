@@ -1,0 +1,39 @@
+{
+  "id": "loam",
+  "version": 1,
+  "name": "Garden Loam",
+  "rough": {
+    "roughness": 0.92
+  },
+  "polished": {
+    "roughness": 0.14,
+    "metalness": 0.02
+  },
+  "layers": [
+    {
+      "type": "fill",
+      "color": "#6b4a32"
+    },
+    {
+      "type": "clouds",
+      "color": "#8a6644",
+      "amount": 0.55,
+      "scale": 2.2,
+      "softness": 0.5
+    },
+    {
+      "type": "clouds",
+      "color": "#4e3424",
+      "amount": 0.35,
+      "scale": 5,
+      "threshold": 0.6
+    },
+    {
+      "type": "speckle",
+      "color": "#2b1d14",
+      "amount": 0.4,
+      "scale": 70,
+      "density": 0.12
+    }
+  ]
+}

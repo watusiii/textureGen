@@ -1,0 +1,22 @@
+{
+  "id": "galaxy",
+  "version": 1,
+  "name": "Nebula",
+  "rough": {
+    "roughness": 0.85
+  },
+  "polished": {
+    "roughness": 0.08,
+    "metalness": 0.05
+  },
+  "layers": [
+    {
+      "type": "galaxy",
+      "color": "#0a0614",
+      "color2": "#8a3ad0",
+      "color3": "#ffffff",
+      "scale": 2.2,
+      "stars": 0.01
+    }
+  ]
+}

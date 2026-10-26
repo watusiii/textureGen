@@ -1,0 +1,21 @@
+{
+  "id": "strata",
+  "version": 1,
+  "name": "Strata",
+  "rough": {
+    "roughness": 0.9
+  },
+  "polished": {
+    "roughness": 0.2,
+    "metalness": 0.01
+  },
+  "layers": [
+    {
+      "type": "strata",
+      "color": "#5a3a22",
+      "color2": "#d8b890",
+      "layers": 9,
+      "bend": 0.5
+    }
+  ]
+}

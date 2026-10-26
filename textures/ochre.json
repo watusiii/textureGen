@@ -1,0 +1,32 @@
+{
+  "id": "ochre",
+  "version": 1,
+  "name": "Yellow Ochre",
+  "rough": {
+    "roughness": 0.92
+  },
+  "polished": {
+    "roughness": 0.16,
+    "metalness": 0.02
+  },
+  "layers": [
+    {
+      "type": "fill",
+      "color": "#c48a2a",
+      "accent": "#d6a240"
+    },
+    {
+      "type": "clouds",
+      "color": "#e2bd6a",
+      "amount": 0.5,
+      "scale": 2.4
+    },
+    {
+      "type": "speckle",
+      "color": "#7a4e14",
+      "amount": 0.35,
+      "scale": 64,
+      "density": 0.15
+    }
+  ]
+}

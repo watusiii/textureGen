@@ -1,0 +1,26 @@
+{
+  "id": "crystal",
+  "version": 1,
+  "name": "Cloud Crystal",
+  "rough": {
+    "roughness": 0.8
+  },
+  "polished": {
+    "roughness": 0.03,
+    "metalness": 0.2
+  },
+  "layers": [
+    {
+      "type": "fill",
+      "color": "#7dd0ea",
+      "accent": "#c8eefa"
+    },
+    {
+      "type": "clouds",
+      "color": "#e6f8ff",
+      "amount": 0.4,
+      "scale": 1.6,
+      "softness": 0.8
+    }
+  ]
+}

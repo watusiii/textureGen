@@ -1,0 +1,33 @@
+{
+  "id": "river",
+  "version": 1,
+  "name": "River Clay",
+  "rough": {
+    "roughness": 0.9
+  },
+  "polished": {
+    "roughness": 0.12,
+    "metalness": 0.03
+  },
+  "layers": [
+    {
+      "type": "fill",
+      "color": "#56645d"
+    },
+    {
+      "type": "ribbons",
+      "color": "#8f8a6a",
+      "amount": 0.5,
+      "scale": 6,
+      "warp": 1,
+      "width": 0.8
+    },
+    {
+      "type": "speckle",
+      "color": "#2e3632",
+      "amount": 0.3,
+      "scale": 70,
+      "density": 0.1
+    }
+  ]
+}
